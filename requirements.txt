@@ -1,1 +1,1 @@
-
+-e git+https://github.com/NaturalHistoryMuseum/ckanext-datasolr.git@egg=ckanext_datasolr
