@@ -1,0 +1,13 @@
+{% raw %}
+    {{#_multiple}}
+        {{count}} records
+    {{/_multiple}}
+    {{^_multiple}}
+        {{#scientificName}}
+          {{scientificName}}
+        {{/scientificName}}
+        {{^scientificName}}
+          Record {{_id}}
+        {{/scientificName}}
+    {{/_multiple}}
+{% endraw %}
