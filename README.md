@@ -1,2 +1,3 @@
-# ckanext-solr-heatmap
-CKAN view for Solr heatmaps
+ckanext-solr-heatmap
+====================
+
