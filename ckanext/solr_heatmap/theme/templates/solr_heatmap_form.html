@@ -1,0 +1,5 @@
+{% import 'macros/form.html' as form %}
+
+{{ form.select('geospatial_field', label=_('Geospatial field'), options=datastore_fields, selected=data.geospatial_field, error=errors.geospatial_field) }}
+
+

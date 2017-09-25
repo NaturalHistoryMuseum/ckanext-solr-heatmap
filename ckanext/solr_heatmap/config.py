@@ -9,10 +9,10 @@ config = {
     'solr_heatmap.zoom_bounds.min': '3',
     'solr_heatmap.zoom_bounds.max': '18',
 
-    # The style parameters for the heatmap. The intensity can be defined per dataset (with the default provided in
-    # the main config if present, or here otherwise), but the marker url and marker size can only be set in the main
-    # config (if present, or here otherwise) as they have a notable performance impact on larger datasets.
-    'solr_heatmap.intensity': '0.1',
-    'solr_heatmap.gradient': '#0000FF, #00FFFF, #00FF00, #FFFF00, #FFA500, #FF0000',
+    # Default style parameters for the heatmap.
+    'solr_heatmap.blur': '5',
+    'solr_heatmap.opacity': '0.5',
+    'solr_heatmap.interp': 'lin',
+    'solr_heatmap.colors': '#0000FF, #00FFFF, #00FF00, #FFFF00, #FFA500, #FF0000',
 
 }
