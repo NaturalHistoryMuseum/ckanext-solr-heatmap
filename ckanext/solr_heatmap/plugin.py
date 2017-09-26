@@ -89,7 +89,7 @@ class SolrHeatmapPlugin(p.SingletonPlugin):
         @return:
         """
         # Remove any of the facet heatmap fields, so validation passes
-        for f in ['heatmap_field', 'heatmap_geom', 'heatmap_format']:
+        for f in ['heatmap_field', 'heatmap_geom', 'heatmap_grid_level']:
             try:
                 data_dict['__extras'].pop(f, None)
             except KeyError:
@@ -108,8 +108,14 @@ class SolrHeatmapPlugin(p.SingletonPlugin):
                 'facet_heatmap_format': 'ints2D',
                 'rows': 0
             }
+
             heatmap_geom = data_dict['__extras'].get('heatmap_geom', None)
             if heatmap_geom:
                 query_dict['additional_solr_params']['facet_heatmap_geom'] = heatmap_geom
+
+            # Add grid level if it exists
+            grid_level = data_dict['__extras'].get('heatmap_grid_level', None)
+            if grid_level:
+                query_dict['additional_solr_params']['facet_heatmap_gridLevel'] = grid_level
 
         return query_dict
