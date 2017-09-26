@@ -25,7 +25,7 @@ if(typeof(L) !== 'undefined' && typeof(L.CanvasLayer) != 'undefined') {
     }
     else if (method === 'log') {
       fx = function(x) {
-        return delta * Math.log((x+1))/Math.log(2);
+        return Math.log(1+x)/Math.log(1+max);
       };
     }
     else {
@@ -314,7 +314,7 @@ if(typeof(L) !== 'undefined' && typeof(L.CanvasLayer) != 'undefined') {
           self.computeStats(hm);
 
           // get the interpolation function
-          var interp = interpolate(0, 1, self.options.interp);
+          var interp = interpolate(0, hm.max, self.options.interp);
 
           // width/height of each grid cell in lng/lat
           var dx = (hm.maxX - hm.minX) / hm.columns;
@@ -338,7 +338,7 @@ if(typeof(L) !== 'undefined' && typeof(L.CanvasLayer) != 'undefined') {
                       var p1 = map.latLngToContainerPoint({lng:x, lat:y});
                       var p2 = map.latLngToContainerPoint({lng:x+dx, lat:y-dy});
 
-                      var val = interp(hm.data[i][j]/hm.max);
+                      var val = interp(hm.data[i][j]);
                       if (val > 0) {
                           var rgb = rgb1.interpolate(rgb2,val);
                           rgb = rgb.opacify(opacity);
