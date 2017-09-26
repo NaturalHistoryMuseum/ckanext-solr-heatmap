@@ -24,11 +24,13 @@ this.solr_heatmap = this.solr_heatmap || {};
         _onReady: function () {
             self.map = L.map(self.el).setView([0.0, -40.0], 2);
             L.tileLayer('http://{s}.tiles.mapbox.com/v4/mapbox.streets/{z}/{x}/{y}@2x.png?access_token=pk.eyJ1IjoibmhtIiwiYSI6ImNpcjU5a3VuNDAwMDNpYm5vY251MW5oNTIifQ.JuGQ2xZ66FKOAOhYl2HdWQ', {
-                maxZoom: 18,
-                attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery <a href="http://stamen.com">Stamen</a>'
-            }).addTo(self.map);
+                maxZoom: 18
+             }).addTo(self.map);
             var layer = new L.SolrHeatmapLayer(self.fetchCallback, {
-                field: 'geom'
+                field: 'geom',
+                blur: 2,
+                opacity: 0.8,
+                interp: 'log'
             });
             layer.addTo(self.map);
         },
@@ -48,25 +50,15 @@ this.solr_heatmap = this.solr_heatmap || {};
                 resource_id: resource.id
             };
 
-            var query = new recline.Model.Query();
-            if (window.parent.ckan.views && window.parent.ckan.views.filters) {
-                var defaultFilters = resourceView.filters || {},
-                    urlFilters = window.parent.ckan.views.filters.get(),
-                    filters = $.extend({}, defaultFilters, urlFilters);
-                $.each(filters, function (field, values) {
-                    query.addFilter({type: 'term', field: field, term: values});
-                });
-                if (window.parent.ckan.views.filters.getFullText()) {
-                    query.set({q: window.parent.ckan.views.filters.getFullText()});
-                }
+            // Add query string and filters
+            if(window.parent.ckan.views.filters.get()){
+                params['filters'] = window.parent.ckan.views.filters.get()
+            }
+            if (window.parent.ckan.views.filters.getFullText()) {
+                params['q'] = window.parent.ckan.views.filters.getFullText();
             }
 
-            // Add any filters to the params
-            var q = query.toJSON();
-            ['q', 'facets', 'filters'].forEach(function(el) {
-                params[el] = q[el]
-            });
-
+            // Add heatmap parameters
             params['heatmap_field'] = resourceView.geospatial_field;
             params['heatmap_geom'] = '[' +
                 Math.max(-180, bbox.getWest()) + ' ' + Math.max(-90, bbox.getSouth()) +
@@ -74,13 +66,28 @@ this.solr_heatmap = this.solr_heatmap || {};
                 Math.min(180, bbox.getEast()) + ' ' + Math.min(90, bbox.getNorth()) +
                 ']';
 
+            // Mappings oz zoom to grid level
+            // As users zooms into the map, the grid resolution increases
+            var zoomGridLevel = {
+                10: 6,
+                7: 5,
+                5: 4
+            };
+            //Default zoom
+            params['heatmap_grid_level'] = 3;
+            for (var zoom in zoomGridLevel) {
+              if (zoomGridLevel.hasOwnProperty(zoom)) {
+                if (self.map.getZoom() >= zoom) {
+                    params['heatmap_grid_level'] = zoomGridLevel[zoom]
+                }
+              }
+            }
             $.ajax({
                 url: ckan.SITE_ROOT + '/api/3/action/datastore_search',
-                type: 'GET',
-                data: params,
+                type: 'POST',
+                data: JSON.stringify(params), // serializes the form's elements.
                 success: $.proxy(function (data, status, jqXHR) {
                     var hm = data.result.facets.facet_heatmaps[resourceView.geospatial_field];
-                    console.log(data.result);
                     hm['data'] = hm.counts_ints2D;
                     then.apply(self, [hm]);
 
@@ -94,7 +101,7 @@ this.solr_heatmap = this.solr_heatmap || {};
         showError: function (msg) {
             msg = msg || _('error loading view');
             window.parent.ckan.pubsub.publish('data-viewer-error', msg);
-        },
+        }
 
 
     });
